@@ -1,0 +1,8 @@
+numpy
+scipy
+pandas
+scikit-learn
+tqdm
+pyyaml
+onnx
+# TensorRT Python wheel provided by JetPack image

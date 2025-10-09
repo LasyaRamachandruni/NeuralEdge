@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+.env
+
+# Data & artifacts
+data/raw/
+data/interim/
+data/processed/
+data/calib/
+engines/
+runs/
+mlruns/
+
+# Results (keep summaries)
+results/figures/
+results/*.npy
+results/*.npz
+!results/summary.csv
+
+# OS/editor
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
