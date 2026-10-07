@@ -49,7 +49,7 @@ Jetson Nano (TensorRT FP16/INT8), Raspberry Pi 4 (ONNX Runtime / TFLite) and pow
 
 1. Push this repo to GitHub, then open `notebooks/run_sleepedf_colab.ipynb` in Colab (File → Open notebook → GitHub).
 2. Runtime → Change runtime type → T4 GPU.
-3. In the first code cell, set `REPO_URL` to your fork. Leave `SUBJECTS = "0-19"` and `FOLDS = 20` to match DeepSleepNet's 20-fold protocol, or use `FOLDS = 5` for a faster run.
+3. The settings cell clones `LasyaRamachandruni/NeuralEdge` (branch `main`); change `REPO_URL` / `BRANCH` if needed. Leave `SUBJECTS = "0-19"` and `FOLDS = 20` to match DeepSleepNet's 20-fold protocol, or use `FOLDS = 5` for a faster run.
 4. Runtime → Run all. The notebook downloads ~40 recordings from PhysioNet through MNE, trains, evaluates, exports ONNX and measures CPU latency.
 5. Download the zip from the last cell and commit `results/sleepedf_results.{json,md}`, `results/sleepedf_confusion.png`, `results/sleepedf_<model>_cv.json` and `results/latency_cpu_colab.json`. Then paste the table from `sleepedf_results.md` into the Results section above.
 
