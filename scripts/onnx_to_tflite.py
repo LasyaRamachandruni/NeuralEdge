@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""ONNX -> TFLite via onnx2tf (for the Raspberry Pi TFLite path).
+
+Status: TODO / untested. Needs tensorflow + onnx2tf, which are not in
+requirements.txt. Note that onnx2tf converts NCW inputs to NWC, so the
+representative dataset below may need transposing once this is exercised.
+"""
 import argparse
 from pathlib import Path
 import numpy as np
@@ -43,7 +49,7 @@ def main():
                 reps = reps[:1024]
                 def rep_ds():
                     for i in range(len(reps)):
-                        yield [reps[i][None, None, :]]
+                        yield [reps[i][None]]  # calib arrays are (n, channels, samples)
                 converter.representative_dataset = rep_ds
                 converter.target_spec.supported_ops = [
                     tf.lite.OpsSet.TFLITE_BUILTINS_INT8
