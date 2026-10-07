@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+"""Build a TensorRT engine from the exported ONNX model (run on the Jetson).
+
+Status: written against the TensorRT 8.x Python API but NOT yet run on a Jetson;
+no engine or latency from it has been measured. See docs/edge_benchmarking.md for
+the trtexec route, which is the simplest way to get the first numbers.
+"""
 import argparse
 from pathlib import Path
 import numpy as np
@@ -10,27 +16,24 @@ except Exception as e:
 
 
 class DataLoader:
-    def __init__(self, calib_dir: Path, max_samples: int = 1024, seq_len: int = 3000):
-        self.seq_len = seq_len
-        self.samples = []
-        if calib_dir.exists():
-            for f in calib_dir.glob("*.npy"):
-                arr = np.load(f)
-                self.samples.append(arr)
+    def __init__(self, calib_dir: Path, max_samples: int = 1024):
+        # calibration arrays are (n, channels, samples), written by data/prepare_*.py
+        self.samples = [np.load(f) for f in sorted(calib_dir.glob("*.npy"))] if calib_dir.exists() else []
         if not self.samples:
-            self.samples = [np.random.randn(max_samples, seq_len).astype(np.float32)]
-        self.samples = np.concatenate(self.samples, axis=0)[:max_samples]
+            raise FileNotFoundError(f"no calibration .npy files in {calib_dir}; run data/prepare_*.py --calib_out")
+        self.samples = np.ascontiguousarray(np.concatenate(self.samples, axis=0)[:max_samples], dtype=np.float32)
         self.idx = 0
 
     def get_batch(self, size: int = 8):
-        if self.idx >= len(self.samples):
+        if self.idx + size > len(self.samples):  # only full batches
             return None
         chunk = self.samples[self.idx : self.idx + size]
         self.idx += size
         return chunk
 
 
-def build_engine(onnx_path: Path, engine_path: Path, precision: str, calib_dir: Path | None):
+def build_engine(onnx_path: Path, engine_path: Path, precision: str, calib_dir: Path | None,
+                 in_ch: int = 1, n_samples: int = 3000):
     if trt is None:
         raise RuntimeError("TensorRT is not available in this environment")
     logger = trt.Logger(trt.Logger.INFO)
@@ -87,7 +90,7 @@ def build_engine(onnx_path: Path, engine_path: Path, precision: str, calib_dir: 
     else:
         pass
     profile = builder.create_optimization_profile()
-    profile.set_shape("input", (1, 1, 3000), (1, 1, 3000), (1, 1, 6000))
+    profile.set_shape("input", (1, in_ch, n_samples), (1, in_ch, n_samples), (8, in_ch, n_samples))
     config.add_optimization_profile(profile)
     engine = builder.build_engine(network, config)
     with open(engine_path, "wb") as f:
@@ -101,12 +104,14 @@ def main():
     ap.add_argument("--engine", type=str, required=True)
     ap.add_argument("--precision", type=str, choices=["fp16", "int8"], required=True)
     ap.add_argument("--calib_dir", type=str, default=None)
+    ap.add_argument("--in_ch", type=int, default=1, help="3 for WESAD")
+    ap.add_argument("--n_samples", type=int, default=3000, help="256 for WESAD (8 s at 32 Hz)")
     args = ap.parse_args()
     onnx_path = Path(args.onnx)
     engine_path = Path(args.engine)
     engine_path.parent.mkdir(parents=True, exist_ok=True)
     calib_dir = Path(args.calib_dir) if args.calib_dir else None
-    build_engine(onnx_path, engine_path, args.precision, calib_dir)
+    build_engine(onnx_path, engine_path, args.precision, calib_dir, args.in_ch, args.n_samples)
 
 
 if __name__ == "__main__":
