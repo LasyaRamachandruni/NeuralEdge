@@ -114,3 +114,14 @@ def test_qat_and_pruning_run(trained, tmp_path):
     assert int8(torch.randn(2, 1, 3000)).shape == (2, 5)
     p = prune.main(common + ["--finetune_epochs", "1", "--prune_ratio", "0.5", "--output", str(tmp_path / "p.pt")])
     assert p["zeroed_channel_fraction"] >= 0.4
+
+
+def test_summary_marks_synthetic_runs(trained):
+    from scripts.summarize_sleepedf import main as summarize
+
+    out = summarize(["--results_dir", str(trained.root / "results"),
+                     "--data_dir", str(trained.root / "data" / "sleepedf")])
+    assert out["synthetic_data"] is True
+    md = (trained.root / "results" / "sleepedf_results.md").read_text()
+    assert "SYNTHETIC DATA" in md and "DeepSleepNet" in md
+    assert set(out["per_class_f1"]) == {"W", "N1", "N2", "N3", "REM"}
