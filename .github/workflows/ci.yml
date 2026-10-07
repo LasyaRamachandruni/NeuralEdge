@@ -1,0 +1,32 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    env:
+      OMP_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install CPU-only PyTorch and test deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements-dev.txt
+      - name: Unit + pipeline tests (synthetic data and fake EDF files only)
+        run: pytest -q
+      - name: CLI smoke run on synthetic data
+        run: |
+          python data/make_synthetic.py --out /tmp/ne/data/sleepedf --subjects 4 --windows_per_subject 20
+          python train.py --data_root /tmp/ne/data --epochs 1 --batch_size 16 --folds 0 --max_folds 1 \
+            --artifacts_dir /tmp/ne/artifacts --log_dir /tmp/ne/results
+          python export_onnx.py --model resnet1d_tiny --checkpoint /tmp/ne/artifacts/sleepedf_resnet1d_tiny_fp32.pt \
+            --data_dir /tmp/ne/data/sleepedf --onnx_path /tmp/ne/artifacts/sleepedf_resnet1d_tiny.onnx
+          python bench.py --mode onnx-cpu --onnx /tmp/ne/artifacts/sleepedf_resnet1d_tiny.onnx --iters 50 --warmup 5
