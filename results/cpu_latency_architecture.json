@@ -1,0 +1,98 @@
+[
+  {
+    "runtime": "onnxruntime 1.29.0 CPUExecutionProvider",
+    "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "machine": "x86_64",
+    "logical_cpus": 2,
+    "threads": 1,
+    "batch": 1,
+    "input_shape": [
+      1,
+      1,
+      3000
+    ],
+    "warmup": 200,
+    "iters": 2000,
+    "p50_ms": 0.3666160000648233,
+    "p90_ms": 0.4448160000720237,
+    "p99_ms": 0.6640614702246238,
+    "mean_ms": 0.395337834504744,
+    "model_bytes": 53669,
+    "model": "mobilenet1d",
+    "input": "sleepedf",
+    "params": 12997,
+    "weights": "random init (architecture only, no accuracy meaning)"
+  },
+  {
+    "runtime": "onnxruntime 1.29.0 CPUExecutionProvider",
+    "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "machine": "x86_64",
+    "logical_cpus": 2,
+    "threads": 1,
+    "batch": 1,
+    "input_shape": [
+      1,
+      3,
+      256
+    ],
+    "warmup": 200,
+    "iters": 2000,
+    "p50_ms": 0.0490090001221688,
+    "p90_ms": 0.06472770000982565,
+    "p99_ms": 0.08763001972965866,
+    "mean_ms": 0.053429140503567396,
+    "model_bytes": 53017,
+    "model": "mobilenet1d",
+    "input": "wesad",
+    "params": 12834,
+    "weights": "random init (architecture only, no accuracy meaning)"
+  },
+  {
+    "runtime": "onnxruntime 1.29.0 CPUExecutionProvider",
+    "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "machine": "x86_64",
+    "logical_cpus": 2,
+    "threads": 1,
+    "batch": 1,
+    "input_shape": [
+      1,
+      1,
+      3000
+    ],
+    "warmup": 200,
+    "iters": 2000,
+    "p50_ms": 0.8442005000688368,
+    "p90_ms": 0.9786057002202143,
+    "p99_ms": 1.8041471601100056,
+    "mean_ms": 0.9039469535014177,
+    "model_bytes": 245935,
+    "model": "resnet1d_tiny",
+    "input": "sleepedf",
+    "params": 61013,
+    "weights": "random init (architecture only, no accuracy meaning)"
+  },
+  {
+    "runtime": "onnxruntime 1.29.0 CPUExecutionProvider",
+    "cpu": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "machine": "x86_64",
+    "logical_cpus": 2,
+    "threads": 1,
+    "batch": 1,
+    "input_shape": [
+      1,
+      3,
+      256
+    ],
+    "warmup": 200,
+    "iters": 2000,
+    "p50_ms": 0.09428950011169945,
+    "p90_ms": 0.1398217002133606,
+    "p99_ms": 0.4179858598627103,
+    "mean_ms": 0.11769882550288457,
+    "model_bytes": 246051,
+    "model": "resnet1d_tiny",
+    "input": "wesad",
+    "params": 61042,
+    "weights": "random init (architecture only, no accuracy meaning)"
+  }
+]
