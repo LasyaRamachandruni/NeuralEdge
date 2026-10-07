@@ -62,7 +62,9 @@ def main(argv=None):
            "int8_qat_macro_f1": macro_f1(int8, test_loader, n_cls), "backend": args.backend}
     out = Path(args.output or f"artifacts/{args.dataset}_{args.model}_qat_int8.pt")
     out.parent.mkdir(parents=True, exist_ok=True)
-    torch.jit.save(torch.jit.trace(int8, torch.randn(1, in_ch, n_samples)), str(out))
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", FutureWarning)  # torch.jit is deprecated in newer torch
+        torch.jit.save(torch.jit.trace(int8, torch.randn(1, in_ch, n_samples)), str(out))
     res["output"] = str(out)
     Path(args.log_dir).mkdir(parents=True, exist_ok=True)
     (Path(args.log_dir) / f"{args.dataset}_{args.model}_qat.json").write_text(json.dumps(res, indent=2))

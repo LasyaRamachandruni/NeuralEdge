@@ -6,6 +6,7 @@ from the processed dataset's meta.json when --data_dir is given.
 """
 import argparse
 import json
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -22,10 +23,14 @@ def export(model: torch.nn.Module, onnx_path: Path, in_ch: int, n_samples: int, 
     onnx_path.parent.mkdir(parents=True, exist_ok=True)
     kwargs = dict(input_names=["input"], output_names=["logits"], opset_version=opset,
                   dynamic_axes={"input": {0: "batch"}, "logits": {0: "batch"}})
-    try:
-        torch.onnx.export(model, (dummy,), str(onnx_path), dynamo=False, **kwargs)
-    except TypeError:  # torch < 2.5 has no dynamo argument
-        torch.onnx.export(model, (dummy,), str(onnx_path), **kwargs)
+    # The TorchScript-based exporter gives a plain static graph that TensorRT and
+    # onnx2tf handle well; newer torch warns that it is deprecated.
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        try:
+            torch.onnx.export(model, (dummy,), str(onnx_path), dynamo=False, **kwargs)
+        except TypeError:  # torch < 2.5 has no dynamo argument
+            torch.onnx.export(model, (dummy,), str(onnx_path), **kwargs)
 
     import onnx
     import onnxruntime as ort
