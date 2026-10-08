@@ -1,0 +1,23 @@
+{
+  "model": "sleepedf_resnet1d_tiny.onnx",
+  "label": "Colab CPU, trained sleepedf deploy checkpoint",
+  "measured_at": "2026-10-08T16:59:53+00:00",
+  "runtime": "onnxruntime 1.30.0 CPUExecutionProvider",
+  "cpu": "Intel(R) Xeon(R) CPU @ 2.00GHz",
+  "machine": "x86_64",
+  "logical_cpus": 2,
+  "threads": 1,
+  "batch": 1,
+  "input_shape": [
+    1,
+    1,
+    3000
+  ],
+  "warmup": 50,
+  "iters": 1000,
+  "p50_ms": 1.1896724997768615,
+  "p90_ms": 1.4074850998895272,
+  "p99_ms": 2.2635914201009655,
+  "mean_ms": 1.2493047860011757,
+  "model_bytes": 246649
+}

@@ -11,7 +11,7 @@ Pipeline: real data loaders → subject-wise cross-validated training → QAT (I
 
 | Part | State |
 |---|---|
-| Sleep-EDF loader (MNE, Fpz-Cz, R&K→AASM, wake trimming, subject-wise files) | Implemented; tested on generated EDF files in CI. Real-data run pending (see below). |
+| Sleep-EDF loader (MNE, Fpz-Cz, R&K→AASM, wake trimming, subject-wise files) | Implemented and run on real data: 20 subjects, 39 recordings (results below). |
 | WESAD loader (pickles, 3-channel windows, leave-one-subject-out) | Implemented; tested on generated pickles in CI. Not yet run on the real dataset. |
 | Training with subject-wise CV, per-fold checkpoints, mean ± std macro-F1 | Implemented and tested |
 | QAT to INT8 (PyTorch FX) and L1 structured pruning | Implemented and tested on synthetic data. Pruning zeroes channels but does not remove them yet, so it does not make the model smaller or faster. |
@@ -20,12 +20,26 @@ Pipeline: real data loaders → subject-wise cross-validated training → QAT (I
 
 ## Results
 
-### Sleep-EDF accuracy: pending
+### Sleep-EDF accuracy (real data)
 
-No accuracy numbers on real data yet. The real run (about 2 GB downloaded from PhysioNet, GPU training) is set up in
-[`notebooks/run_sleepedf_colab.ipynb`](notebooks/run_sleepedf_colab.ipynb). That notebook writes `results/sleepedf_results.json` and a
-table that goes here. The table compares against DeepSleepNet's published Sleep-EDF result (macro-F1 0.769, accuracy 0.820 [1]).
-DeepSleepNet is a larger CNN + BiLSTM that looks at sequences of epochs, so it is a reference point, not a like-for-like baseline.
+**`resnet1d_tiny` (61k parameters, 247 kB ONNX) reaches macro-F1 0.724 ± 0.061, accuracy 78.1% and Cohen's κ 0.709** under leave-one-subject-out cross-validation on 20 Sleep-EDF subjects (42,307 scored 30-s test epochs), and classifies an epoch in 1.19 ms (p50) on one CPU thread.
+
+Sleep-EDF Expanded (sleep-cassette), subjects 0-19 (20 subjects, 42307 scored 30-s test epochs), Fpz-Cz, leave-one-subject-out CV.
+
+| Model | Macro-F1 (mean ± std over folds) | Pooled acc. | Cohen's κ | W | N1 | N2 | N3 | REM | ONNX CPU p50 (batch 1) |
+|---|---|---|---|---|---|---|---|---|---|
+| `resnet1d_tiny` (this repo) | 0.724 ± 0.061 | 0.781 | 0.709 | 0.880 | 0.371 | 0.835 | 0.842 | 0.735 | 1.19 ms |
+| DeepSleepNet (Supratak et al., 2017) [ref] | 0.769 (reported) | 0.820 | - | - | - | - | - | - | - |
+
+Per-class F1 is computed on all test folds pooled. Latency: onnxruntime 1.30.0 CPUExecutionProvider on Intel(R) Xeon(R) CPU @ 2.00GHz, 1 thread(s) - a cloud CPU, not an edge device.
+
+[ref] A. Supratak, H. Dong, C. Wu, Y. Guo, "DeepSleepNet: a Model for Automatic Sleep Stage Scoring based on Raw Single-Channel EEG", IEEE Trans. Neural Syst. Rehabil. Eng. 25(11), 2017. arXiv:1703.04046. Not a like-for-like comparison: DeepSleepNet uses the 2013 Sleep-EDF release and models sequences of epochs; this repo classifies each 30-s epoch independently with a much smaller CNN.
+
+- Trained on a Colab Tesla T4 (30 epochs max, early stopping on held-out training subjects, balanced class weights, seed 0, commit `517a741`). Full results: [`results/sleepedf_results.json`](results/sleepedf_results.json); per-fold scores: [`results/sleepedf_resnet1d_tiny_cv.json`](results/sleepedf_resnet1d_tiny_cv.json).
+- N1 is the hardest stage (F1 0.371), as in the literature: it is rare and looks like both wake and N2. Per-subject macro-F1 ranges from 0.547 to 0.807.
+- The exported model is in [`models/sleepedf_resnet1d_tiny.onnx`](models/sleepedf_resnet1d_tiny.onnx).
+
+![Confusion matrix](results/sleepedf_confusion.png)
 
 ### ONNX Runtime CPU latency (architecture only)
 

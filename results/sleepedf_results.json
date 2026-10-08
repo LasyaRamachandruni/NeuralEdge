@@ -1,0 +1,169 @@
+{
+  "synthetic_data": false,
+  "dataset": {
+    "name": "Sleep-EDF Expanded, sleep-cassette (PhysioNet)",
+    "subjects": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "n_subjects": 20,
+    "channel": [
+      "EEG Fpz-Cz"
+    ],
+    "classes": [
+      "W",
+      "N1",
+      "N2",
+      "N3",
+      "REM"
+    ],
+    "fs": 100.0,
+    "edge_minutes": 30.0,
+    "n_recordings": 39
+  },
+  "model": "resnet1d_tiny",
+  "cv_scheme": "leave-one-subject-out",
+  "n_folds_run": 20,
+  "macro_f1_mean": 0.723743122565371,
+  "macro_f1_std": 0.06123219761720887,
+  "pooled_macro_f1": 0.732865616388786,
+  "pooled_accuracy": 0.7807691398586523,
+  "pooled_cohen_kappa": 0.7088006731943313,
+  "per_class_f1": {
+    "W": 0.880395794681509,
+    "N1": 0.37144571085782846,
+    "N2": 0.834802770066201,
+    "N3": 0.8424772803769774,
+    "REM": 0.735206525961414
+  },
+  "confusion_matrix": {
+    "labels": [
+      "W",
+      "N1",
+      "N2",
+      "N3",
+      "REM"
+    ],
+    "rows_true_cols_pred": [
+      [
+        7118,
+        924,
+        90,
+        27,
+        125
+      ],
+      [
+        320,
+        1548,
+        256,
+        22,
+        658
+      ],
+      [
+        118,
+        1627,
+        13682,
+        1121,
+        1251
+      ],
+      [
+        13,
+        79,
+        588,
+        5006,
+        17
+      ],
+      [
+        317,
+        1353,
+        364,
+        5,
+        5678
+      ]
+    ]
+  },
+  "n_test_epochs": 42307,
+  "per_fold_macro_f1": [
+    0.757093385761628,
+    0.7480708484969414,
+    0.7233141739339708,
+    0.7409604373242121,
+    0.6854157523813396,
+    0.7950856767806768,
+    0.8065626445819609,
+    0.8040320302183707,
+    0.6973289311174995,
+    0.7042100103782157,
+    0.6364255966192494,
+    0.5466839070981437,
+    0.7162885329444412,
+    0.7647448163988473,
+    0.7706671030021324,
+    0.7967407887711971,
+    0.7018337454749495,
+    0.7062278339277303,
+    0.6753137881845104,
+    0.6978624479114007
+  ],
+  "onnx_cpu_latency": {
+    "cpu": "Intel(R) Xeon(R) CPU @ 2.00GHz",
+    "runtime": "onnxruntime 1.30.0 CPUExecutionProvider",
+    "threads": 1,
+    "batch": 1,
+    "input_shape": [
+      1,
+      1,
+      3000
+    ],
+    "iters": 1000,
+    "p50_ms": 1.1896724997768615,
+    "p90_ms": 1.4074850998895272,
+    "p99_ms": 2.2635914201009655,
+    "model_bytes": 246649
+  },
+  "reference": {
+    "name": "DeepSleepNet",
+    "citation": "A. Supratak, H. Dong, C. Wu, Y. Guo, \"DeepSleepNet: a Model for Automatic Sleep Stage Scoring based on Raw Single-Channel EEG\", IEEE Trans. Neural Syst. Rehabil. Eng. 25(11), 2017. arXiv:1703.04046",
+    "url": "https://arxiv.org/abs/1703.04046",
+    "setting": "Sleep-EDF (2013 release, 20 subjects), Fpz-Cz, 20-fold subject-wise CV, CNN + BiLSTM sequence model",
+    "accuracy": 0.82,
+    "macro_f1": 0.769,
+    "note": "Not a like-for-like comparison: DeepSleepNet uses the 2013 Sleep-EDF release and models sequences of epochs; this repo classifies each 30-s epoch independently with a much smaller CNN."
+  },
+  "environment": {
+    "torch": "2.11.0+cu130",
+    "device": "cuda",
+    "python": "3.13.15",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.39",
+    "gpu": "Tesla T4",
+    "git_commit": "517a741"
+  },
+  "train_config": {
+    "epochs": 30,
+    "batch_size": 128,
+    "lr": 0.001,
+    "early_stop_patience": 5,
+    "folds": 20,
+    "val_frac": 0.15,
+    "class_weights": "balanced",
+    "seed": 0
+  }
+}
